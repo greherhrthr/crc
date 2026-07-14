@@ -59,6 +59,7 @@
 
         .loading { color: #4a4e62; text-align: center; padding: 40px; font-size: 16px; }
         .loading span { color: #00ffff; }
+        .error-msg { color: #ff4d4d; text-align: center; padding: 20px; }
     </style>
 </head>
 <body>
@@ -115,37 +116,45 @@
 </div>
 
 <script>
-    // ✅ ВАШ ID ГРУППЫ УЖЕ ВСТАВЛЕН!
     const GROUP_ID = 15970102; 
 
+    // ⚡ ФИКС: Используем AllOrigins в качестве прокси для обхода CORS и блокировок Roblox
+    const PROXY_URL = "https://api.allorigins.win/get?url=";
+
     const API = {
-        group: `https://groups.roblox.com/v1/groups/${GROUP_ID}`,
-        roles: `https://groups.roblox.com/v1/groups/${GROUP_ID}/roles`,
-        members: `https://groups.roblox.com/v1/groups/${GROUP_ID}/users?limit=20`,
-        wall: `https://groups.roblox.com/v1/groups/${GROUP_ID}/wall/posts?limit=5`,
-        icon: `https://thumbnails.roblox.com/v1/groups/icons?groupIds=${GROUP_ID}&size=420x420&format=Png`,
-        avatar: (userId) => `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=48x48&format=Png`
+        group: encodeURIComponent(`https://groups.roblox.com/v1/groups/${GROUP_ID}`),
+        roles: encodeURIComponent(`https://groups.roblox.com/v1/groups/${GROUP_ID}/roles`),
+        members: encodeURIComponent(`https://groups.roblox.com/v1/groups/${GROUP_ID}/users?limit=20`),
+        wall: encodeURIComponent(`https://groups.roblox.com/v1/groups/${GROUP_ID}/wall/posts?limit=5`),
+        icon: encodeURIComponent(`https://thumbnails.roblox.com/v1/groups/icons?groupIds=${GROUP_ID}&size=420x420&format=Png`),
+        avatar: (userId) => encodeURIComponent(`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=48x48&format=Png`)
     };
+
+    async function fetchWithProxy(url) {
+        const response = await fetch(PROXY_URL + url);
+        if (!response.ok) throw new Error("Proxy request failed");
+        const data = await response.json();
+        return JSON.parse(data.contents);
+    }
 
     async function fetchData() {
         try {
-            const [groupRes, rolesRes, membersRes, wallRes, iconRes] = await Promise.all([
-                fetch(API.group), fetch(API.roles), fetch(API.members), fetch(API.wall), fetch(API.icon)
+            const [group, roles, members, wall, icon] = await Promise.all([
+                fetchWithProxy(API.group),
+                fetchWithProxy(API.roles),
+                fetchWithProxy(API.members),
+                fetchWithProxy(API.wall),
+                fetchWithProxy(API.icon)
             ]);
-            
-            const group = await groupRes.json();
-            const roles = await rolesRes.json();
-            const members = await membersRes.json();
-            const wall = await wallRes.json();
-            const icon = await iconRes.json();
 
             renderGroup(group, icon.data[0]?.imageUrl);
             renderRoles(roles.roles);
             renderMembers(members.data);
             renderWall(wall.data);
         } catch (error) {
-            document.getElementById('groupName').innerText = "Ошибка загрузки";
             console.error("API Error:", error);
+            document.getElementById('groupName').innerText = "Ошибка загрузки";
+            document.getElementById('groupDescription').innerText = "⚠️ Roblox API временно недоступен для этого прокси. Попробуйте перезагрузить страницу.";
         }
     }
 
