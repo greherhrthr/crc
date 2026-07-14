@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberRealm Creators</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        body { background: #0a0b10; color: #e0e0e0; display: flex; justify-content: center; min-height: 100vh; padding: 20px; }
+        .container { max-width: 900px; width: 100%; background: #12141c; border-radius: 20px; padding: 25px; box-shadow: 0 0 40px rgba(0, 255, 255, 0.1); border: 1px solid #222; }
+
+        .group-header { display: flex; gap: 20px; align-items: center; border-bottom: 1px solid #2a2d3a; padding-bottom: 20px; margin-bottom: 20px; }
+        .group-icon { width: 100px; height: 100px; border-radius: 16px; background: #1e212b; border: 2px solid #ff00ff; box-shadow: 0 0 15px #ff00ff55; object-fit: cover; }
+        .group-info h1 { font-size: 28px; color: #ffffff; text-shadow: 0 0 8px #00ffff; margin-bottom: 5px; letter-spacing: 1px; }
+        .group-info .owner { color: #b0b3c5; font-size: 14px; margin-bottom: 10px; }
+        .group-info .owner span { color: #00ffff; }
+        .group-info .stats { display: flex; gap: 15px; flex-wrap: wrap; }
+        .stats .badge { background: #202330; padding: 6px 14px; border-radius: 30px; font-size: 13px; font-weight: 600; border: 1px solid #333; }
+        .stats .badge span { color: #00ffff; }
+
+        .banner { background: #181a24; border: 1px solid #2f3342; border-radius: 12px; padding: 15px 20px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; }
+        .banner .text { display: flex; flex-direction: column; }
+        .banner .text h3 { color: #fff; font-size: 15px; margin-bottom: 4px; }
+        .banner .text p { color: #7a7e93; font-size: 13px; }
+        .banner .btn { background: #2d3248; color: #fff; padding: 8px 20px; border-radius: 6px; text-decoration: none; font-size: 13px; font-weight: 600; border: 1px solid #444; transition: 0.2s; cursor: pointer; }
+        .banner .btn:hover { background: #00ffff; color: #000; border-color: #00ffff; }
+
+        .tabs { display: flex; gap: 30px; border-bottom: 1px solid #2a2d3a; padding-bottom: 10px; margin-bottom: 20px; }
+        .tabs .tab { color: #7a7e93; font-size: 16px; font-weight: 600; cursor: pointer; padding-bottom: 10px; position: relative; transition: 0.3s; }
+        .tabs .tab.active { color: #fff; }
+        .tabs .tab.active::after { content: ''; position: absolute; bottom: -11px; left: 0; width: 100%; height: 3px; background: #00ffff; box-shadow: 0 0 10px #00ffff; border-radius: 2px; }
+
+        .section { display: none; animation: fade 0.3s ease; }
+        .section.active { display: block; }
+        @keyframes fade { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        .role-list { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+        .role-card { background: #1a1d28; padding: 10px 18px; border-radius: 30px; border: 1px solid #2f3342; font-size: 13px; font-weight: 500; color: #b0b3c5; }
+        .role-card span { color: #00ffff; font-weight: 700; }
+
+        .member-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; margin-top: 10px; }
+        .member-item { background: #161822; border-radius: 10px; padding: 12px; text-align: center; border: 1px solid #252834; transition: 0.2s; }
+        .member-item:hover { border-color: #00ffff; transform: scale(1.02); }
+        .member-item .avatar { width: 60px; height: 60px; border-radius: 50%; background: #0e1018; margin: 0 auto 8px; border: 2px solid #333; object-fit: cover; }
+        .member-item .name { font-size: 13px; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .member-item .role { font-size: 11px; color: #7a7e93; }
+
+        .wall-post { background: #161822; border-radius: 12px; padding: 15px; margin-bottom: 12px; border-left: 3px solid #00ffff; }
+        .wall-post .poster { font-weight: 600; color: #00ffff; font-size: 14px; margin-bottom: 4px; }
+        .wall-post .date { font-size: 11px; color: #4a4e62; margin-bottom: 8px; }
+        .wall-post .content { color: #cfd2e0; font-size: 14px; line-height: 1.5; }
+
+        @media (max-width: 600px) {
+            .group-header { flex-direction: column; align-items: flex-start; }
+            .group-icon { width: 80px; height: 80px; }
+            .tabs { gap: 15px; font-size: 14px; }
+            .member-grid { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
+        }
+
+        .loading { color: #4a4e62; text-align: center; padding: 40px; font-size: 16px; }
+        .loading span { color: #00ffff; }
+    </style>
+</head>
+<body>
+
+<div class="container" id="app">
+    
+    <div class="group-header" id="header">
+        <img src="" alt="Group Icon" class="group-icon" id="groupIcon">
+        <div class="group-info">
+            <h1 id="groupName">Загрузка...</h1>
+            <div class="owner">By <span id="groupOwner">...</span></div>
+            <div class="stats">
+                <div class="badge">👥 <span id="memberCount">0</span> Members</div>
+                <div class="badge" id="roleCountBadge">🎖️ <span id="roleCount">0</span> Roles</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="banner">
+        <div class="text">
+            <h3>⚡ NEW: Powerful Community Hub</h3>
+            <p>View roles, members, and wall posts in real-time.</p>
+        </div>
+        <a href="#" class="btn" id="createBtn">Create</a>
+    </div>
+
+    <div class="tabs">
+        <div class="tab active" data-tab="about">About</div>
+        <div class="tab" data-tab="roles">Roles</div>
+        <div class="tab" data-tab="wall">Wall</div>
+    </div>
+
+    <div class="section active" id="section-about">
+        <h3 style="color: #fff; margin-bottom: 10px;">Описание</h3>
+        <p id="groupDescription" style="color: #b0b3c5; line-height: 1.6; margin-bottom: 20px;">Загрузка описания...</p>
+        
+        <h3 style="color: #fff; margin-bottom: 15px;">👥 Участники (первые 5)</h3>
+        <div class="member-grid" id="membersGrid"></div>
+    </div>
+
+    <div class="section" id="section-roles">
+        <h3 style="color: #fff; margin-bottom: 15px;">🎖️ Роли группы</h3>
+        <div class="role-list" id="rolesList"></div>
+        <p style="color: #4a4e62; font-size: 13px; margin-top: 15px;">* Показаны топ-5 ролей</p>
+    </div>
+
+    <div class="section" id="section-wall">
+        <h3 style="color: #fff; margin-bottom: 15px;">📢 Стена группы</h3>
+        <div id="wallContainer">
+            <div class="loading">Загрузка постов со стены...</div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // ✅ ВАШ ID ГРУППЫ УЖЕ ВСТАВЛЕН!
+    const GROUP_ID = 15970102; 
+
+    const API = {
+        group: `https://groups.roblox.com/v1/groups/${GROUP_ID}`,
+        roles: `https://groups.roblox.com/v1/groups/${GROUP_ID}/roles`,
+        members: `https://groups.roblox.com/v1/groups/${GROUP_ID}/users?limit=20`,
+        wall: `https://groups.roblox.com/v1/groups/${GROUP_ID}/wall/posts?limit=5`,
+        icon: `https://thumbnails.roblox.com/v1/groups/icons?groupIds=${GROUP_ID}&size=420x420&format=Png`,
+        avatar: (userId) => `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=48x48&format=Png`
+    };
+
+    async function fetchData() {
+        try {
+            const [groupRes, rolesRes, membersRes, wallRes, iconRes] = await Promise.all([
+                fetch(API.group), fetch(API.roles), fetch(API.members), fetch(API.wall), fetch(API.icon)
+            ]);
+            
+            const group = await groupRes.json();
+            const roles = await rolesRes.json();
+            const members = await membersRes.json();
+            const wall = await wallRes.json();
+            const icon = await iconRes.json();
+
+            renderGroup(group, icon.data[0]?.imageUrl);
+            renderRoles(roles.roles);
+            renderMembers(members.data);
+            renderWall(wall.data);
+        } catch (error) {
+            document.getElementById('groupName').innerText = "Ошибка загрузки";
+            console.error("API Error:", error);
+        }
+    }
+
+    function renderGroup(group, iconUrl) {
+        document.getElementById('groupIcon').src = iconUrl || 'https://via.placeholder.com/100';
+        document.getElementById('groupName').innerText = group.name || "Без названия";
+        document.getElementById('groupOwner').innerText = group.owner ? group.owner.username : "Неизвестно";
+        document.getElementById('memberCount').innerText = group.memberCount || 0;
+        document.getElementById('roleCount').innerText = (group.roles && group.roles.length) || 0;
+        document.getElementById('groupDescription').innerText = group.description || "У этой группы пока нет описания.";
+    }
+
+    function renderRoles(roles) {
+        const container = document.getElementById('rolesList');
+        if (!roles || roles.length === 0) {
+            container.innerHTML = '<div class="loading">Нет ролей</div>';
+            return;
+        }
+        const topRoles = roles.slice(0, 5);
+        container.innerHTML = topRoles.map(role => `
+            <div class="role-card">${role.name} <span>(${role.memberCount})</span></div>
+        `).join('');
+    }
+
+    function renderMembers(data) {
+        const grid = document.getElementById('membersGrid');
+        if (!data || data.length === 0) {
+            grid.innerHTML = '<div class="loading">Нет участников</div>';
+            return;
+        }
+        const top = data.slice(0, 5);
+        grid.innerHTML = top.map(user => `
+            <div class="member-item">
+                <img src="${API.avatar(user.userId)}" class="avatar" alt="Avatar" onerror="this.src='https://via.placeholder.com/60'">
+                <div class="name">${user.username}</div>
+                <div class="role">${user.role ? user.role.name : 'Участник'}</div>
+            </div>
+        `).join('');
+    }
+
+    function renderWall(posts) {
+        const container = document.getElementById('wallContainer');
+        if (!posts || posts.length === 0) {
+            container.innerHTML = '<div class="loading">На стене пока нет сообщений...</div>';
+            return;
+        }
+        container.innerHTML = posts.map(post => `
+            <div class="wall-post">
+                <div class="poster">${post.poster.username}</div>
+                <div class="date">${new Date(post.created).toLocaleDateString('ru-RU')}</div>
+                <div class="content">${post.body || 'Пустое сообщение'}</div>
+            </div>
+        `).join('');
+    }
+
+    const tabs = document.querySelectorAll('.tab');
+    const sections = {
+        about: document.getElementById('section-about'),
+        roles: document.getElementById('section-roles'),
+        wall: document.getElementById('section-wall')
+    };
+
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            tabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            
+            Object.keys(sections).forEach(key => {
+                sections[key].classList.remove('active');
+            });
+            sections[tab.dataset.tab].classList.add('active');
+        });
+    });
+
+    fetchData();
+</script>
+
+</body>
+</html>
